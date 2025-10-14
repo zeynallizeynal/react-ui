@@ -10,14 +10,14 @@ export default function Home() {
     <main className="flex relative items-center justify-center min-h-screen">
       <div className="w-100 mx-auto">
         <Accordion type="single">
-          <AccordionItem className="AccordionItem" value="item-1">
+          <AccordionItem value="item-1">
             <AccordionTrigger>Is it accessible?</AccordionTrigger>
             <AccordionContent>
               Yes. It adheres to the WAI-ARIA design pattern.
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem className="AccordionItem" value="item-2">
+          <AccordionItem value="item-2">
             <AccordionTrigger>Is it unstyled?</AccordionTrigger>
             <AccordionContent>
               Yes. It&#39;s unstyled by default, giving you freedom over the
@@ -25,7 +25,7 @@ export default function Home() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem className="AccordionItem" value="item-3">
+          <AccordionItem value="item-3">
             <AccordionTrigger>Can it be animated?</AccordionTrigger>
             <AccordionContent className="AccordionContent">
               <div className="AccordionContentText">
