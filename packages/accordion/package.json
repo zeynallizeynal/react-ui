@@ -19,6 +19,7 @@
   "devDependencies": {
     "@react-ui/typescript-config": "workspace:*",
     "@react-ui/context": "workspace:*",
+    "@react-ui/slot": "workspace:*",
     "@types/react": "19.1.0",
     "typescript": "latest"
   },

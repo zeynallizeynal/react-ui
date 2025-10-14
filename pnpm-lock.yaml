@@ -88,6 +88,9 @@ importers:
       '@react-ui/context':
         specifier: workspace:*
         version: link:../context
+      '@react-ui/slot':
+        specifier: workspace:*
+        version: link:../slot
       '@react-ui/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -152,6 +155,25 @@ importers:
       typescript-eslint:
         specifier: ^8.40.0
         version: 8.40.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.2)
+
+  packages/slot:
+    dependencies:
+      react:
+        specifier: '>19.0.0'
+        version: 19.1.0
+      react-dom:
+        specifier: '>19.0.0'
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@react-ui/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/react':
+        specifier: 19.1.0
+        version: 19.1.0
+      typescript:
+        specifier: latest
+        version: 5.9.3
 
   packages/typescript-config: {}
 
