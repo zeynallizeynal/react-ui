@@ -3,25 +3,38 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@react-ui/accordion';
+} from '@/components/ui/accordion';
 
 export default function Home() {
   return (
     <main className="flex relative items-center justify-center min-h-screen">
-      <Accordion type="single">
-        <AccordionItem value="test">
-          <AccordionTrigger>Trigger</AccordionTrigger>
-          <AccordionContent className="data-[state=closed]:animate-out data-[state=closed]:zoom-out data-[state=open]:animate-in data-[state=open]:zoom-in">
-            Content
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="test1">
-          <AccordionTrigger>Trigger2</AccordionTrigger>
-          <AccordionContent className="data-[state=closed]:animate-out data-[state=closed]:zoom-out data-[state=open]:animate-in data-[state=open]:zoom-in">
-            Content2
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <div className="w-100 mx-auto">
+        <Accordion type="single">
+          <AccordionItem className="AccordionItem" value="item-1">
+            <AccordionTrigger>Is it accessible?</AccordionTrigger>
+            <AccordionContent>
+              Yes. It adheres to the WAI-ARIA design pattern.
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem className="AccordionItem" value="item-2">
+            <AccordionTrigger>Is it unstyled?</AccordionTrigger>
+            <AccordionContent>
+              Yes. It&#39;s unstyled by default, giving you freedom over the
+              look and feel.
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem className="AccordionItem" value="item-3">
+            <AccordionTrigger>Can it be animated?</AccordionTrigger>
+            <AccordionContent className="AccordionContent">
+              <div className="AccordionContentText">
+                Yes! You can animate the Accordion with CSS or JavaScript.
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
     </main>
   );
 }

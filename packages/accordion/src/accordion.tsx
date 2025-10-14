@@ -1,6 +1,7 @@
 import { createContext } from '@react-ui/context';
 import React, { useState } from 'react';
 import { Slot } from '@react-ui/slot';
+import { mergeRefs } from '@react-ui/utils';
 
 type WithAsChild<Type> = Type & { asChild?: boolean };
 
@@ -8,6 +9,8 @@ type State = 'open' | 'closed' | 'closing';
 type Type = 'single' | 'multiple';
 
 interface AccordionContextProps {
+  activeItem: React.RefObject<HTMLElement | null>;
+
   states: Record<string, State>;
   setStates(states: Record<string, State>): void;
 
@@ -17,6 +20,7 @@ interface AccordionContextProps {
 }
 
 interface AccordionItemContextProps {
+  id: string;
   state: State;
   disabled?: boolean;
   value: string;
@@ -36,14 +40,26 @@ interface AccordionProps extends WithAsChild<React.ComponentProps<'div'>> {
   disabled?: boolean;
 }
 
-function Accordion(props: AccordionProps) {
-  const [states, setStates] = useState<Record<string, State>>({});
+function Accordion({
+  type,
+  value: controlledValue,
+  defaultValue,
+  onValueChange,
+  collapsible,
+  disabled,
+  ...props
+}: AccordionProps) {
+  const [states, setStates] = React.useState<Record<string, State>>({});
+
+  const activeItem = React.useRef<HTMLElement>(null);
+
+  const ref = React.useRef<HTMLElement>(null);
 
   const Comp = props.asChild ? Slot : 'div';
 
   const handleOpen = React.useCallback(
-    (value: string) => {
-      switch (props.type) {
+    (val: string) => {
+      switch (type) {
         case 'single': {
           const rest = Object.keys(states).reduce(
             (acc, cur) => ({
@@ -52,39 +68,82 @@ function Accordion(props: AccordionProps) {
             }),
             {},
           );
-          setStates({ ...rest, [value]: 'open' });
+          setStates({ ...rest, [val]: 'open' });
           break;
         }
         case 'multiple':
-          setStates((prevState) => ({ ...prevState, [value]: 'open' }));
+          setStates((prevState) => ({ ...prevState, [val]: 'open' }));
           break;
       }
     },
     [setStates, states],
   );
   const handleClosing = React.useCallback(
-    (value: string) => {
-      setStates((prevState) => ({ ...prevState, [value]: 'closing' }));
+    (val: string) => {
+      setStates((prevState) => ({ ...prevState, [val]: 'closing' }));
     },
     [setStates],
   );
   const handleClosed = React.useCallback(
-    (value: string) => {
-      setStates((prevState) => ({ ...prevState, [value]: 'closed' }));
+    (val: string) => {
+      setStates((prevState) => ({ ...prevState, [val]: 'closed' }));
     },
     [setStates],
   );
 
+  React.useEffect(() => {
+    if (defaultValue) handleOpen(defaultValue);
+  }, []);
+
+  React.useEffect(() => {
+    if (!ref.current) return;
+
+    const collectionItems = Array.from(
+      ref.current.querySelectorAll<HTMLElement>(
+        '[data-collection-item]:not([disabled])',
+      ),
+    );
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (!collectionItems.length || !activeItem.current) return;
+
+      const activeIndex = collectionItems.indexOf(activeItem.current);
+      if (activeIndex === -1) return;
+
+      let nextIndex = activeIndex;
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        nextIndex = (activeIndex + 1) % collectionItems.length;
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        nextIndex =
+          (activeIndex - 1 + collectionItems.length) % collectionItems.length;
+      }
+
+      const next = collectionItems[nextIndex];
+      if (next) {
+        next.focus();
+        activeItem.current = next;
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [ref]);
+
   return (
     <AccordionProvider
-      {...props}
+      activeItem={activeItem}
       states={states}
       setStates={setStates}
       handleOpen={handleOpen}
       handleClosing={handleClosing}
       handleClosed={handleClosed}
     >
-      <Comp {...props} />
+      <Comp {...props} ref={mergeRefs(ref, props.ref)} />
     </AccordionProvider>
   );
 }
@@ -97,17 +156,24 @@ interface AccordionItemProps extends WithAsChild<React.ComponentProps<'div'>> {
   disabled?: boolean;
 }
 
-function AccordionItem(props: AccordionItemProps) {
+function AccordionItem({
+  value,
+  disabled,
+  asChild,
+  ...props
+}: AccordionItemProps) {
   const { states } = useAccordion();
+  const id = React.useId();
 
-  const Comp = props.asChild ? Slot : 'div';
+  const Comp = asChild ? Slot : 'div';
 
-  const state = states[props.value] || 'closed';
+  const state = states[value] || 'closed';
   return (
     <AccordionItemProvider
+      id={id}
       state={state}
-      disabled={props.disabled}
-      value={props.value}
+      disabled={disabled}
+      value={value}
     >
       <Comp {...props} />
     </AccordionItemProvider>
@@ -120,21 +186,39 @@ function AccordionItem(props: AccordionItemProps) {
 interface AccordionTriggerProps
   extends WithAsChild<React.ComponentProps<'button'>> {}
 
-function AccordionTrigger(props: AccordionTriggerProps) {
-  const { handleOpen, handleClosing } = useAccordion();
-  const { state, disabled, value } = useAccordionItem();
-  const Comp = props.asChild ? Slot : 'button';
+function AccordionTrigger({
+  asChild,
+  onFocus,
+  onBlur,
+  ...props
+}: AccordionTriggerProps) {
+  const { handleOpen, handleClosing, activeItem } = useAccordion();
+  const { state, disabled, value, id } = useAccordionItem();
+
+  const Comp = asChild ? Slot : 'button';
 
   const attrs = {
-    disabled,
+    'aria-controls': id,
     'data-state': state === 'open' ? 'open' : 'closed',
+    'data-collection-item': '',
+    disabled,
+    type: 'button',
     onClick(event) {
       event.preventDefault();
       if (state !== 'open') handleOpen(value);
       else handleClosing(value);
     },
+    onFocus(event) {
+      activeItem.current = event.currentTarget;
+      onFocus?.(event);
+    },
+    onBlur(event) {
+      activeItem.current = null;
+      onBlur?.(event);
+    },
     ...props,
   } as React.HTMLAttributes<HTMLButtonElement>;
+
   return <Comp {...attrs} />;
 }
 
@@ -144,26 +228,59 @@ function AccordionTrigger(props: AccordionTriggerProps) {
 interface AccordionContentProps
   extends WithAsChild<React.ComponentProps<'div'>> {}
 
-function AccordionContent(props: AccordionContentProps) {
+function AccordionContent({
+  children,
+  asChild,
+  ...props
+}: AccordionContentProps) {
   const { handleClosed } = useAccordion();
-  const { state, value } = useAccordionItem();
-  const Comp = props.asChild ? Slot : 'div';
+  const { state, value, id } = useAccordionItem();
+  const [variables, setVariables] = useState<
+    React.CSSProperties & Record<string, string | number>
+  >();
+
+  const ref = React.useRef<HTMLDivElement>(null);
+  const lastVars = React.useRef<{ height?: string; width?: string }>({});
+
+  const Comp = asChild ? Slot : 'div';
 
   const attrs = {
+    id,
     'data-state': state === 'open' ? 'open' : 'closed',
     onAnimationEnd() {
       if (state !== 'closing') return;
       handleClosed(value);
     },
     style: {
-      animationFillMode: state !== 'open' ? 'forwards' : undefined,
+      animationFillMode: state == 'closing' ? 'forwards' : undefined,
+      display: state == 'closed' ? 'none' : undefined,
+      ...variables,
       ...props.style,
     },
     ...props,
   } as React.HTMLAttributes<HTMLDivElement>;
 
-  if (state === 'closed') return null;
-  return <Comp {...attrs} />;
+  React.useLayoutEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+    if (!el) return;
+
+    const height = el.scrollHeight || el.clientHeight;
+    const width = el.scrollWidth || el.clientWidth;
+    if (height > 0) lastVars.current.height = `${height}px`;
+    if (width > 0) lastVars.current.width = `${width}px`;
+
+    setVariables({
+      '--ui-accordion-content-height': lastVars.current.height ?? '0px',
+      '--ui-accordion-content-width': lastVars.current.width ?? '0px',
+    });
+  }, [state]);
+
+  return (
+    <Comp {...attrs} ref={mergeRefs(ref, props.ref)}>
+      {state === 'closed' ? null : children}
+    </Comp>
+  );
 }
 
 export { Accordion, AccordionItem, AccordionContent, AccordionTrigger };

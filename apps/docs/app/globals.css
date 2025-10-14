@@ -41,6 +41,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-accordion-open: accordion-open 0.2s ease-out;
+  --animate-accordion-close: accordion-close 0.2s ease-out;
 }
 
 :root {
@@ -116,7 +118,26 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@keyframes accordion-open {
+  0% {
+    height: 0;
+  }
+  100% {
+    height: var(--ui-accordion-content-height);
+  }
+}
+
+@keyframes accordion-close {
+  0% {
+    height: var(--ui-accordion-content-height);
+  }
+  100% {
+    height: 0;
   }
 }
