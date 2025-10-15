@@ -2,6 +2,7 @@ import { createContext } from '@react-ui/context';
 import React, { useState } from 'react';
 import { Slot } from '@react-ui/slot';
 import { mergeRefs } from '@react-ui/utils';
+import { useKeyboardNavigation } from '@react-ui/hooks';
 
 type WithAsChild<Type> = Type & { asChild?: boolean };
 
@@ -50,13 +51,14 @@ function Accordion({
   ...props
 }: AccordionProps) {
   const [states, setStates] = React.useState<Record<string, State>>(() => {
+    if (controlledValue) return { [controlledValue]: 'open' };
     if (defaultValue) return { [defaultValue]: 'open' };
     return {};
   });
 
-  const activeItem = React.useRef<HTMLElement>(null);
-
-  const ref = React.useRef<HTMLElement>(null);
+  const { ref, activeRef: activeItem } = useKeyboardNavigation(
+    '[data-collection-item]:not([disabled])',
+  );
 
   const Comp = props.asChild ? Slot : 'div';
 
@@ -79,8 +81,8 @@ function Accordion({
             [value]: 'open',
           } as Record<string, State>;
 
-          setStates(obj);
           onValueChange?.(value);
+          setStates(obj);
           break;
         }
         case 'multiple':
@@ -108,43 +110,8 @@ function Accordion({
   );
 
   React.useEffect(() => {
-    if (!ref.current) return;
-
-    const collectionItems = Array.from(
-      ref.current.querySelectorAll<HTMLElement>(
-        '[data-collection-item]:not([disabled])',
-      ),
-    );
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (!collectionItems.length || !activeItem.current) return;
-
-      const activeIndex = collectionItems.indexOf(activeItem.current);
-      if (activeIndex === -1) return;
-
-      let nextIndex = activeIndex;
-
-      if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        nextIndex = (activeIndex + 1) % collectionItems.length;
-      } else if (event.key === 'ArrowUp') {
-        event.preventDefault();
-        nextIndex =
-          (activeIndex - 1 + collectionItems.length) % collectionItems.length;
-      }
-
-      const next = collectionItems[nextIndex];
-      if (next) {
-        next.focus();
-        activeItem.current = next;
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [ref]);
+    if (controlledValue) handleOpen(controlledValue);
+  }, [controlledValue]);
 
   return (
     <AccordionProvider

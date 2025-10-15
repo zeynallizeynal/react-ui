@@ -6,12 +6,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useState } from 'react';
 
 export default function Home() {
+  const [value, setValue] = useState('item-3');
+
   return (
     <main className="flex relative items-center justify-center min-h-screen">
       <div className="w-100 mx-auto">
-        <Accordion type="single" defaultValue="item-1">
+        <Accordion type="single">
           <AccordionItem value="item-1">
             <AccordionTrigger>Is it accessible?</AccordionTrigger>
             <AccordionContent>

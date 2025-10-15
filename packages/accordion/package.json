@@ -21,6 +21,7 @@
     "@react-ui/context": "workspace:*",
     "@react-ui/slot": "workspace:*",
     "@react-ui/utils": "workspace:*",
+    "@react-ui/hooks": "workspace:*",
     "@types/react": "19.1.0",
     "typescript": "latest"
   },
