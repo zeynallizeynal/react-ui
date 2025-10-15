@@ -33,8 +33,8 @@ const [AccordionItemProvider, useAccordionItem] =
 
 interface AccordionProps extends WithAsChild<React.ComponentProps<'div'>> {
   type: Type;
-  value?: string;
   defaultValue?: string;
+  value?: string;
   onValueChange?(value: string): void;
   collapsible?: boolean;
   disabled?: boolean;
@@ -57,8 +57,10 @@ function Accordion({
 
   const Comp = props.asChild ? Slot : 'div';
 
+  const isControlled = controlledValue !== undefined;
+
   const handleOpen = React.useCallback(
-    (val: string) => {
+    (value: string) => {
       switch (type) {
         case 'single': {
           const rest = Object.keys(states).reduce(
@@ -68,15 +70,21 @@ function Accordion({
             }),
             {},
           );
-          setStates({ ...rest, [val]: 'open' });
+          const obj = {
+            ...rest,
+            [value]: 'open',
+          } as Record<string, State>;
+
+          setStates(obj);
+          onValueChange?.(value);
           break;
         }
         case 'multiple':
-          setStates((prevState) => ({ ...prevState, [val]: 'open' }));
+          setStates((prevState) => ({ ...prevState, [value]: 'open' }));
           break;
       }
     },
-    [setStates, states],
+    [setStates, states, isControlled, onValueChange, type],
   );
   const handleClosing = React.useCallback(
     (val: string) => {
@@ -92,7 +100,11 @@ function Accordion({
   );
 
   React.useEffect(() => {
-    if (defaultValue) handleOpen(defaultValue);
+    if (!isControlled && defaultValue) handleOpen(defaultValue);
+  }, []);
+
+  React.useEffect(() => {
+    if (isControlled) handleOpen(controlledValue);
   }, []);
 
   React.useEffect(() => {
