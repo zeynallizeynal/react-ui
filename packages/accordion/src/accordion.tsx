@@ -11,6 +11,7 @@ type Type = 'single' | 'multiple';
 interface AccordionContextProps {
   activeItem: React.RefObject<HTMLElement | null>;
   collapsible?: boolean;
+  disabled?: boolean;
   states: Record<string, State>;
 
   handleOpen(value: string): void;
@@ -63,6 +64,7 @@ function Accordion({
 
   const handleOpen = React.useCallback(
     (value: string) => {
+      if (disabled) return;
       switch (type) {
         case 'single': {
           const rest = Object.keys(states).reduce(
@@ -86,21 +88,23 @@ function Accordion({
           break;
       }
     },
-    [setStates, states, isControlled, onValueChange, type],
+    [setStates, disabled, states, isControlled, onValueChange, type],
   );
   const handleClosing = React.useCallback(
     (val: string) => {
+      if (disabled) return;
       if (collapsible)
         setStates((prevState) => ({ ...prevState, [val]: 'closing' }));
       else return;
     },
-    [setStates],
+    [setStates, disabled],
   );
   const handleClosed = React.useCallback(
     (val: string) => {
+      if (disabled) return;
       setStates((prevState) => ({ ...prevState, [val]: 'closed' }));
     },
-    [setStates],
+    [setStates, disabled],
   );
 
   React.useEffect(() => {
@@ -149,6 +153,7 @@ function Accordion({
       handleOpen={handleOpen}
       handleClosing={handleClosing}
       handleClosed={handleClosed}
+      disabled={disabled}
     >
       <Comp {...props} ref={mergeRefs(ref, props.ref)} />
     </AccordionProvider>
@@ -199,7 +204,12 @@ function AccordionTrigger({
   onBlur,
   ...props
 }: AccordionTriggerProps) {
-  const { handleOpen, handleClosing, activeItem } = useAccordion();
+  const {
+    handleOpen,
+    handleClosing,
+    activeItem,
+    disabled: accordionDisabled,
+  } = useAccordion();
   const { state, disabled, value, id } = useAccordionItem();
 
   const Comp = asChild ? Slot : 'button';
@@ -208,7 +218,7 @@ function AccordionTrigger({
     'aria-controls': id,
     'data-state': state === 'open' ? 'open' : 'closed',
     'data-collection-item': '',
-    disabled,
+    disabled: disabled || accordionDisabled,
     type: 'button',
     onClick(event) {
       event.preventDefault();
