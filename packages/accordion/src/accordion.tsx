@@ -10,9 +10,8 @@ type Type = 'single' | 'multiple';
 
 interface AccordionContextProps {
   activeItem: React.RefObject<HTMLElement | null>;
-
+  collapsible?: boolean;
   states: Record<string, State>;
-  setStates(states: Record<string, State>): void;
 
   handleOpen(value: string): void;
   handleClosing(value: string): void;
@@ -45,11 +44,14 @@ function Accordion({
   value: controlledValue,
   defaultValue,
   onValueChange,
-  collapsible,
+  collapsible = true,
   disabled,
   ...props
 }: AccordionProps) {
-  const [states, setStates] = React.useState<Record<string, State>>({});
+  const [states, setStates] = React.useState<Record<string, State>>(() => {
+    if (defaultValue) return { [defaultValue]: 'open' };
+    return {};
+  });
 
   const activeItem = React.useRef<HTMLElement>(null);
 
@@ -88,7 +90,9 @@ function Accordion({
   );
   const handleClosing = React.useCallback(
     (val: string) => {
-      setStates((prevState) => ({ ...prevState, [val]: 'closing' }));
+      if (collapsible)
+        setStates((prevState) => ({ ...prevState, [val]: 'closing' }));
+      else return;
     },
     [setStates],
   );
@@ -98,14 +102,6 @@ function Accordion({
     },
     [setStates],
   );
-
-  React.useEffect(() => {
-    if (!isControlled && defaultValue) handleOpen(defaultValue);
-  }, []);
-
-  React.useEffect(() => {
-    if (isControlled) handleOpen(controlledValue);
-  }, []);
 
   React.useEffect(() => {
     if (!ref.current) return;
@@ -150,7 +146,6 @@ function Accordion({
     <AccordionProvider
       activeItem={activeItem}
       states={states}
-      setStates={setStates}
       handleOpen={handleOpen}
       handleClosing={handleClosing}
       handleClosed={handleClosed}
