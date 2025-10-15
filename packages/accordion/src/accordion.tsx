@@ -293,6 +293,11 @@ function AccordionContent({
     });
   }, [state]);
 
+  React.useLayoutEffect(() => {
+    if (!ref.current || state !== 'closing') return;
+    if (ref.current.getAnimations().length === 0) handleClosed(value);
+  }, [state]);
+
   return (
     <Comp {...attrs} ref={mergeRefs(ref, props.ref)}>
       {state === 'closed' ? null : children}
