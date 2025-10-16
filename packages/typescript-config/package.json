@@ -1,6 +1,6 @@
 {
-  "name": "@react-ui/typescript-config",
-  "version": "0.0.0",
+  "name": "@lucide-ui/typescript-config",
+  "version": "0.0.3",
   "private": true,
   "license": "MIT",
   "publishConfig": {

@@ -1,4 +1,4 @@
-import * as AccordionPrimitive from '@react-ui/accordion';
+import * as AccordionPrimitive from '@lucide-ui/accordion';
 import { cn } from '@/lib/utils';
 import { ChevronRight } from 'lucide-react';
 

@@ -1,8 +1,8 @@
-import { createContext } from '@react-ui/context';
+import { createContext } from '@lucide-ui/context';
 import React, { useState } from 'react';
-import { Slot } from '@react-ui/slot';
-import { mergeRefs } from '@react-ui/utils';
-import { useKeyboardNavigation } from '@react-ui/hooks';
+import { Slot } from '@lucide-ui/slot';
+import { mergeRefs } from '@lucide-ui/utils';
+import { useKeyboardNavigation } from '@lucide-ui/hooks';
 
 type WithAsChild<Type> = Type & { asChild?: boolean };
 
@@ -86,6 +86,7 @@ function Accordion({
           break;
         }
         case 'multiple':
+          onValueChange?.(value);
           setStates((prevState) => ({ ...prevState, [value]: 'open' }));
           break;
       }

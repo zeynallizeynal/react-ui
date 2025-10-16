@@ -1,28 +1,45 @@
 {
-  "name": "@react-ui/accordion",
+  "name": "@lucide-ui/accordion",
   "type": "module",
+  "version": "0.2.13",
+  "source": "./src/index.ts",
+  "main": "./src/index.ts",
+  "module": "./src/index.js",
+  "publishConfig": {
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      }
+    }
+  },
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc"
+    "dev": "tsup --watch",
+    "build": "tsup"
   },
   "files": [
     "dist",
-    "package.json",
     "README.md"
   ],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+  "dependencies": {
+    "@lucide-ui/context": "workspace:*",
+    "@lucide-ui/hooks": "workspace:*",
+    "@lucide-ui/slot": "workspace:*",
+    "@lucide-ui/utils": "workspace:*"
   },
   "devDependencies": {
-    "@react-ui/typescript-config": "workspace:*",
-    "@react-ui/context": "workspace:*",
-    "@react-ui/slot": "workspace:*",
-    "@react-ui/utils": "workspace:*",
-    "@react-ui/hooks": "workspace:*",
+    "@lucide-ui/typescript-config": "workspace:*",
     "@types/react": "19.1.0",
+    "tsup": "^8.5.0",
     "typescript": "latest"
   },
   "peerDependencies": {

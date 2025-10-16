@@ -1,5 +1,6 @@
 {
-  "name": "@react-ui/utils",
+  "name": "@lucide-ui/utils",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "tsc --watch",
@@ -17,7 +18,7 @@
     }
   },
   "devDependencies": {
-    "@react-ui/typescript-config": "workspace:*",
+    "@lucide-ui/typescript-config": "workspace:*",
     "@types/react": "19.1.0",
     "typescript": "latest"
   },

@@ -1,6 +1,7 @@
 {
-  "name": "@react-ui/hooks",
+  "name": "@lucide-ui/hooks",
   "type": "module",
+  "version": "0.1.0",
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc"
@@ -17,7 +18,7 @@
     }
   },
   "devDependencies": {
-    "@react-ui/typescript-config": "workspace:*",
+    "@lucide-ui/typescript-config": "workspace:*",
     "@types/react": "19.1.0",
     "typescript": "latest"
   },
