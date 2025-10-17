@@ -1,10 +1,10 @@
 {
   "name": "@lucide-ui/accordion",
   "type": "module",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "source": "./src/index.ts",
   "main": "./src/index.ts",
-  "module": "./src/index.js",
+  "module": "./src/index.ts",
   "publishConfig": {
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
@@ -22,9 +22,11 @@
       }
     }
   },
+  "sideEffects": false,
   "scripts": {
     "dev": "tsup --watch",
-    "build": "tsup"
+    "build": "tsup",
+    "clean": "rimraf dist && rimraf .turbo"
   },
   "files": [
     "dist",
@@ -39,6 +41,7 @@
   "devDependencies": {
     "@lucide-ui/typescript-config": "workspace:*",
     "@types/react": "19.1.0",
+    "rimraf": "^6.0.1",
     "tsup": "^8.5.0",
     "typescript": "latest"
   },

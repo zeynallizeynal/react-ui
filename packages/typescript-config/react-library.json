@@ -4,6 +4,10 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
-    "module": "ESNext"
+    "module": "ESNext",
+    "lib": [
+      "ESNext",
+      "DOM"
+    ]
   }
 }
