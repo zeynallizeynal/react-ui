@@ -1,17 +1,15 @@
 import { createContext } from '@lucide-ui/context';
-import React from 'react';
-import { useKeyboardNavigation } from '@lucide-ui/hooks';
+import React, { useState } from 'react';
 import { mergeRefs } from '@lucide-ui/utils';
 
 interface OTPContextProps {
+  disabled?: boolean;
+  inputs: HTMLInputElement[];
   value: string;
   onChange(value: string): void;
 
-  inputRef: React.RefObject<HTMLInputElement | null>;
-
-  disabled?: boolean;
-  activeItem: React.RefObject<HTMLElement | null>;
-  registeredItems: HTMLInputElement[];
+  inputValues: Record<number, string>;
+  setInputValues: React.Dispatch<React.SetStateAction<Record<number, string>>>;
 }
 
 const [OTPProvider, useOTP] = createContext<OTPContextProps>('OTP');
@@ -39,63 +37,46 @@ function OTP({
   ...props
 }: OTPProps) {
   const [uncontrolledValue, setUncontrolledValue] = React.useState<string>('');
-  const registeredItems = React.useRef<HTMLInputElement[]>([]);
-  const { ref, activeRef } = useKeyboardNavigation(
-    '[data-collection-item]:not([disabled])',
-  );
-  const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const value = controlledValue ?? uncontrolledValue;
+  const [inputs, setInputs] = useState<HTMLInputElement[]>([]);
+  const [inputValues, setInputValues] = useState<Record<number, string>>({});
+
+  const value =
+    controlledValue !== undefined ? controlledValue : uncontrolledValue;
 
   const onChange = React.useCallback((value: string) => {
     if (disabled) return;
-    if (controlledValue) onValueChange?.(value);
+    if (controlledValue !== undefined) onValueChange?.(value);
     else setUncontrolledValue(value);
   }, []);
 
+  const ref = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     if (!ref.current) return;
-
-    registeredItems.current = Array.from(
-      ref.current.querySelectorAll<HTMLInputElement>(
-        'input[data-collection-item]',
+    setInputs(
+      Array.from(
+        ref.current.querySelectorAll<HTMLInputElement>(
+          'input[data-collection-item]',
+        ),
       ),
     );
   }, []);
 
   return (
     <OTPProvider
-      inputRef={inputRef}
-      registeredItems={registeredItems.current}
-      activeItem={activeRef}
+      setInputValues={setInputValues}
+      inputValues={inputValues}
+      inputs={inputs}
       disabled={disabled}
       value={value}
-      onChange={onChange}
     >
-      <div
-        {...props}
-        ref={mergeRefs(ref, props.ref)}
-        style={{
-          position: 'relative',
-          ...props.style,
-        }}
-      >
+      <div {...props} tabIndex={0} ref={mergeRefs(ref, props.ref)}>
         {children}
         <input
-          ref={inputRef}
-          tabIndex={-1}
-          autoComplete="one-time-code"
           value={value}
           onChange={(event) => {
             onChange(event.target.value);
-          }}
-          style={{
-            all: 'unset',
-            position: 'absolute',
-            inset: 0,
-            caretColor: 'transparent',
-            textAlign: 'center',
-            color: 'transparent',
           }}
         />
       </div>
@@ -107,19 +88,51 @@ function OTP({
  * OTP Input
  */
 
-interface OTPInputProps extends React.ComponentProps<'div'> {}
+interface OTPInputProps extends React.ComponentProps<'input'> {}
 
-function OTPInput({ ...props }: OTPInputProps) {
-  const { activeItem, registeredItems, disabled, value, onChange, inputRef } =
-    useOTP();
+function OTPInput({ ref, ...props }: OTPInputProps) {
+  const [inputValue, setInputValue] = React.useState<string>('');
+  const { inputs, setInputValues, inputValues, value } = useOTP();
+  const currentRef = React.useRef<HTMLInputElement>(null);
+
+  const currentIndex = currentRef.current
+    ? inputs.indexOf(currentRef.current)
+    : -1;
+
+  const lastAvailableIndex =
+    Object.entries(inputValues)
+      .filter(([_, v]) => v)
+      .map(([i]) => i)
+      .slice(-1)[0] ?? -1;
+
+  React.useEffect(() => {
+    if (currentIndex === -1) return;
+    setInputValues((prevState) => ({
+      ...prevState,
+      [currentIndex]: inputValue.slice(-1),
+    }));
+
+    if (inputValue === '') {
+      const prev = inputs[Math.max(currentIndex - 1, 0)];
+      if (prev) {
+        prev?.focus();
+      }
+    }
+  }, [inputValue]);
 
   return (
-    <div
-      onClick={() => {
-        inputRef.current?.focus();
-      }}
+    <input
       data-collection-item=""
+      ref={mergeRefs(currentRef, ref)}
       {...props}
+      value={value[currentIndex] || inputValue.slice(-1)}
+      onChange={(event) => {
+        setInputValue(event.target.value);
+        if (inputs[currentIndex + 1]) inputs[currentIndex + 1]?.focus();
+      }}
+      onFocus={(event) => {
+        event.currentTarget.select();
+      }}
     />
   );
 }
