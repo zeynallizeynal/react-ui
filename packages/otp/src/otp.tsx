@@ -4,7 +4,8 @@ import { mergeRefs } from '@lucide-ui/utils';
 
 interface OTPContextProps {
   disabled?: boolean;
-  inputs: HTMLElement[];
+  slots: HTMLElement[];
+  activeSlots: HTMLElement[];
   focused: boolean;
 
   value: string;
@@ -27,8 +28,6 @@ interface OTPProps extends React.ComponentProps<'div'> {
   autoSubmit?: boolean;
 
   onAutoSubmit?(value: string): void;
-
-  inputProps?: React.ComponentProps<'input'>;
 }
 
 function OTP({
@@ -37,15 +36,19 @@ function OTP({
   pattern = '[^0-9]',
   value: controlledValue,
   onValueChange,
-  inputProps,
+  id,
+  name,
+  inputMode,
   ...props
-}: OTPProps) {
+}: OTPProps &
+  Pick<React.ComponentProps<'input'>, 'id' | 'name' | 'inputMode'>) {
   const [uncontrolledValue, setUncontrolledValue] = React.useState<string>('');
 
   const value =
     controlledValue !== undefined ? controlledValue : uncontrolledValue;
 
-  const [inputs, setInputs] = React.useState<HTMLElement[]>([]);
+  const [slots, setSlots] = React.useState<HTMLElement[]>([]);
+  const [activeSlots, setActiveSlots] = React.useState<HTMLElement[]>([]);
   const [focused, setFocused] = React.useState<boolean>(false);
 
   const ref = React.useRef<HTMLDivElement>(null);
@@ -70,20 +73,56 @@ function OTP({
 
   React.useEffect(() => {
     if (!ref.current) return;
-    setInputs(
+    setSlots(
       Array.from(
         ref.current.querySelectorAll<HTMLElement>('[data-collection-item]'),
       ),
     );
   }, []);
 
+  React.useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (!ref.current || !focused) return;
+
+      const activeItem =
+        ref.current.querySelector<HTMLElement>('[data-active]');
+      if (!activeItem) return;
+
+      const activeIndex = slots.indexOf(activeItem);
+      if (activeIndex === -1) return;
+
+      let nextIndex = activeIndex;
+
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        nextIndex = (activeIndex - 1 + slots.length) % slots.length;
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        nextIndex = (activeIndex + 1) % slots.length;
+      } else {
+        return;
+      }
+
+      slots.forEach((el) => el.removeAttribute('data-active'));
+
+      const nextEl = slots[nextIndex];
+      if (nextEl) {
+        nextEl.setAttribute('data-active', '');
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [focused, slots]);
+
   return (
     <OTPProvider
       onChange={onChange}
       disabled={disabled}
       value={value}
-      inputs={inputs}
+      slots={slots}
       focused={focused}
+      activeSlots={activeSlots}
     >
       <div
         {...props}
@@ -96,7 +135,6 @@ function OTP({
         {children}
 
         <input
-          {...inputProps}
           value={value}
           autoComplete="one-time-code"
           autoCorrect="off"
@@ -104,7 +142,13 @@ function OTP({
             const sanitized = sanitizeValue(event.target.value, pattern);
             onChange(sanitized);
           }}
-          maxLength={inputs.length}
+          name={name}
+          id={id}
+          inputMode={inputMode}
+          disabled={disabled}
+          type="text"
+          pattern={pattern}
+          maxLength={slots.length}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           style={{
@@ -125,30 +169,32 @@ function OTP({
  * OTP Input
  */
 
-interface OTPInputProps extends React.ComponentProps<'input'> {}
+interface OTPSlotProps extends React.ComponentProps<'input'> {}
 
-function OTPInput({ children, ...props }: OTPInputProps) {
-  const { value, inputs, focused } = useOTP();
+function OTPSlot({ children, ...props }: OTPSlotProps) {
+  const { value, slots, focused, activeSlots } = useOTP();
 
   const ref = React.useRef<HTMLElement>(null);
 
-  const currentIndex = ref.current ? inputs.indexOf(ref.current) : 0;
+  const currentIndex = ref.current ? slots.indexOf(ref.current) : 0;
 
   const isActive =
-    focused && Math.min(inputs.length - 1, value.length) === currentIndex;
+    ref.current &&
+    activeSlots.includes(ref.current) &&
+    Math.min(activeSlots.length - 1, value.length) === currentIndex;
 
   return (
     <div
+      tabIndex={isActive ? 0 : undefined}
       data-collection-item=""
       data-index={currentIndex}
       data-active={isActive ? '' : null}
       {...props}
       ref={mergeRefs(ref, props.ref)}
     >
-      {value[currentIndex]}
-      {isActive && children}
+      {value[currentIndex] ? value[currentIndex] : isActive && children}
     </div>
   );
 }
 
-export { OTP, OTPInput };
+export { OTP, OTPSlot };

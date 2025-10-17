@@ -1,19 +1,21 @@
-import { OTP, OTPInput } from '@lucide-ui/otp';
+'use client';
+
+import { useState } from 'react';
+import { OTP, OTPSlot } from '@/components/ui/opt';
 
 export default function Home() {
+  const [value, setValue] = useState('');
+
   return (
     <main className="flex relative items-center justify-center min-h-screen">
       <div className="w-100 mx-auto">
-        <OTP className="flex items-center gap-2 mx-auto w-fit">
-          <OTPInput className="inline-flex items-center justify-center text-sm h-9 w-6 rounded border text-center data-[active]:ring-2 outline-none transition">
-            <div className="animate-caret-blink w-px h-4 bg-black" />
-          </OTPInput>
-          <OTPInput className="inline-flex items-center justify-center text-sm h-9 w-6 rounded border text-center data-[active]:ring-2 outline-none transition" />
-          <OTPInput className="inline-flex items-center justify-center text-sm h-9 w-6 rounded border text-center data-[active]:ring-2 outline-none transition" />
-          <div className="w-3 h-0.5 rounded-md bg-neutral-300" />
-          <OTPInput className="inline-flex items-center justify-center text-sm h-9 w-6 rounded border text-center data-[active]:ring-2 outline-none transition" />
-          <OTPInput className="inline-flex items-center justify-center text-sm h-9 w-6 rounded border text-center data-[active]:ring-2 outline-none transition" />
-          <OTPInput className="inline-flex items-center justify-center text-sm h-9 w-6 rounded border text-center data-[active]:ring-2 outline-none transition" />
+        <OTP value={value} onValueChange={setValue}>
+          <OTPSlot />
+          <OTPSlot />
+          <OTPSlot />
+          <OTPSlot />
+          <OTPSlot />
+          <OTPSlot />
         </OTP>
         {/*
         <Accordion type="single">
