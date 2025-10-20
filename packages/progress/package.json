@@ -1,7 +1,7 @@
 {
   "name": "@lucide-ui/progress",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "source": "./src/index.ts",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -33,9 +33,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@lucide-ui/context": "workspace:*",
-    "@lucide-ui/hooks": "workspace:*",
-    "@lucide-ui/utils": "workspace:*"
+    "@lucide-ui/context": "workspace:*"
   },
   "devDependencies": {
     "@lucide-ui/typescript-config": "workspace:*",

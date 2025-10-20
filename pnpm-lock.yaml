@@ -42,6 +42,9 @@ importers:
       '@lucide-ui/progress':
         specifier: workspace:*
         version: link:../../packages/progress
+      '@lucide-ui/slider':
+        specifier: workspace:*
+        version: link:../../packages/slider
       '@radix-ui/react-slot':
         specifier: ^1.2.3
         version: 1.2.3(@types/react@19.1.0)(react@19.1.0)
@@ -248,9 +251,34 @@ importers:
       '@lucide-ui/context':
         specifier: workspace:*
         version: link:../context
-      '@lucide-ui/hooks':
+      react:
+        specifier: '>19.0.0'
+        version: 19.1.0
+      react-dom:
+        specifier: '>19.0.0'
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@lucide-ui/typescript-config':
         specifier: workspace:*
-        version: link:../hooks
+        version: link:../typescript-config
+      '@types/react':
+        specifier: ^19.1.0
+        version: 19.1.0
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)
+      typescript:
+        specifier: latest
+        version: 5.9.3
+
+  packages/slider:
+    dependencies:
+      '@lucide-ui/context':
+        specifier: workspace:*
+        version: link:../context
       '@lucide-ui/utils':
         specifier: workspace:*
         version: link:../utils

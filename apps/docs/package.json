@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -12,6 +12,7 @@
     "@lucide-ui/accordion": "workspace:*",
     "@lucide-ui/otp": "workspace:*",
     "@lucide-ui/progress": "workspace:*",
+    "@lucide-ui/slider": "workspace:*",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
