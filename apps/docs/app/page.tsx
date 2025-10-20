@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { OTP, OTPSlot } from '@/components/ui/opt';
+import { OTP, OTPSlot } from '@/components/ui/otp';
 
 export default function Home() {
   const [value, setValue] = useState('');

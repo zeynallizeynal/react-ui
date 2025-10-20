@@ -16,7 +16,7 @@ export function OTPSlot(
     <OTPPrimitive.OTPSlot
       {...props}
       className={cn(
-        'inline-flex items-center justify-center text-sm h-9 w-6 rounded border text-center data-[active]:ring-2 outline-none transition',
+        'inline-flex items-center justify-center text-sm h-9 w-6 rounded border text-center outline-none transition data-[active]:ring-2 focus-visible:ring-2',
       )}
     >
       <div className="animate-caret-blink w-px h-4 bg-black" />

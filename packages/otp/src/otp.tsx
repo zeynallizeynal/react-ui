@@ -6,7 +6,6 @@ interface OTPContextProps {
   disabled?: boolean;
   slots: HTMLElement[];
   activeSlots: HTMLElement[];
-  focused: boolean;
 
   value: string;
   onChange(value: string): void;
@@ -49,7 +48,6 @@ function OTP({
 
   const [slots, setSlots] = React.useState<HTMLElement[]>([]);
   const [activeSlots, setActiveSlots] = React.useState<HTMLElement[]>([]);
-  const [focused, setFocused] = React.useState<boolean>(false);
 
   const ref = React.useRef<HTMLDivElement>(null);
 
@@ -82,38 +80,41 @@ function OTP({
 
   React.useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (!ref.current || !focused) return;
+      if (!ref.current) return;
 
-      const activeItem =
+      const activeSlot =
         ref.current.querySelector<HTMLElement>('[data-active]');
-      if (!activeItem) return;
+      if (!activeSlot) return;
 
-      const activeIndex = slots.indexOf(activeItem);
+      const activeIndex = activeSlots.indexOf(activeSlot);
       if (activeIndex === -1) return;
 
       let nextIndex = activeIndex;
 
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
-        nextIndex = (activeIndex - 1 + slots.length) % slots.length;
+        nextIndex = (activeIndex - 1 + activeSlots.length) % activeSlots.length;
       } else if (event.key === 'ArrowRight') {
         event.preventDefault();
-        nextIndex = (activeIndex + 1) % slots.length;
+        nextIndex = (activeIndex + 1) % activeSlots.length;
       } else {
         return;
       }
-
-      slots.forEach((el) => el.removeAttribute('data-active'));
-
-      const nextEl = slots[nextIndex];
-      if (nextEl) {
-        nextEl.setAttribute('data-active', '');
-      }
+      const nextSlot = activeSlots[nextIndex];
+      activeSlots.forEach((el) => {
+        el.removeAttribute('data-active');
+      });
+      nextSlot?.setAttribute('data-active', '');
     }
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [focused, slots]);
+  }, [slots, activeSlots]);
+
+  React.useEffect(() => {
+    const focusableSlots = slots.filter((_, index) => index <= value.length);
+    setActiveSlots(focusableSlots);
+  }, [value]);
 
   return (
     <OTPProvider
@@ -121,7 +122,6 @@ function OTP({
       disabled={disabled}
       value={value}
       slots={slots}
-      focused={focused}
       activeSlots={activeSlots}
     >
       <div
@@ -149,8 +149,14 @@ function OTP({
           type="text"
           pattern={pattern}
           maxLength={slots.length}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onFocus={() => {
+            const firstSlot = slots[value.length];
+            if (!firstSlot) return;
+            setActiveSlots([firstSlot]);
+          }}
+          onBlur={() => {
+            setActiveSlots([]);
+          }}
           style={{
             position: 'absolute',
             inset: 0,
@@ -172,7 +178,7 @@ function OTP({
 interface OTPSlotProps extends React.ComponentProps<'input'> {}
 
 function OTPSlot({ children, ...props }: OTPSlotProps) {
-  const { value, slots, focused, activeSlots } = useOTP();
+  const { value, slots, activeSlots } = useOTP();
 
   const ref = React.useRef<HTMLElement>(null);
 
@@ -185,7 +191,6 @@ function OTPSlot({ children, ...props }: OTPSlotProps) {
 
   return (
     <div
-      tabIndex={isActive ? 0 : undefined}
       data-collection-item=""
       data-index={currentIndex}
       data-active={isActive ? '' : null}

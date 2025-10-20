@@ -1,7 +1,7 @@
 {
   "name": "@lucide-ui/otp",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "source": "./src/index.ts",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
