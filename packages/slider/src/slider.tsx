@@ -1,17 +1,21 @@
 import { createContext } from '@lucide-ui/context';
 import React from 'react';
 import { mergeRefs } from '@lucide-ui/utils';
+import { useControllableState } from '@lucide-ui/hooks';
 
 interface SliderContextProps {
   defaultValue?: number[];
-  min?: number;
-  max?: number;
+  min: number;
+  max: number;
   step?: number;
 
   trackRef: React.RefObject<HTMLElement | null>;
   trackWidth: number;
 
   sliderRef: React.RefObject<HTMLElement | null>;
+
+  value: number[];
+  onChange(value: number[]): void;
 }
 
 const [SliderProvider, useSlider] = createContext<SliderContextProps>('Slider');
@@ -26,20 +30,30 @@ interface SliderProps
   min?: number;
   max?: number;
   step?: number;
+  value?: number[];
+  onValueChange?(value: number[]): void;
 }
 
 function Slider({
+  ref,
   max = 100,
   min = 0,
   step = 1,
   defaultValue,
-  ref,
+  value,
+  onValueChange,
   ...props
 }: SliderProps) {
   const [trackWidth, setTrackWidth] = React.useState<number>(0);
 
   const sliderRef = React.useRef<HTMLElement>(null);
   const trackRef = React.useRef<HTMLElement>(null);
+
+  const [currentValue, setCurrentValue] = useControllableState<number[]>({
+    value,
+    defaultValue,
+    onChange: onValueChange,
+  });
 
   React.useLayoutEffect(() => {
     if (!trackRef.current) return;
@@ -48,13 +62,15 @@ function Slider({
 
   return (
     <SliderProvider
-      defaultValue={defaultValue}
       max={max}
       min={min}
       step={step}
       trackRef={trackRef}
       trackWidth={trackWidth}
       sliderRef={sliderRef}
+      value={currentValue || []}
+      onChange={setCurrentValue}
+      defaultValue={defaultValue}
     >
       <div {...props} ref={mergeRefs(ref, sliderRef)} />
     </SliderProvider>
@@ -83,66 +99,78 @@ function SliderThumb({
   style,
   ...props
 }: SliderThumbProps) {
-  const { max, min, step, trackWidth, sliderRef } = useSlider();
-  const [thumbWidth, setThumbWidth] = React.useState<number>(0);
+  const { max, min, step, trackWidth, sliderRef, value, onChange } =
+    useSlider();
 
+  const [thumbWidth, setThumbWidth] = React.useState<number>(0);
   const [draggingStart, setDraggingStart] = React.useState<number>(0);
   const [dragging, setDragging] = React.useState<boolean>(false);
   const [delta, setDelta] = React.useState<number>(0);
+  const [thumbIndex, setThumbIndex] = React.useState<number>(-1);
 
   const thumbRef = React.useRef<HTMLElement>(null);
+
+  const maxDelta = trackWidth - thumbWidth;
+  const minDelta = 0;
 
   React.useEffect(() => {
     function handleMove(event: MouseEvent) {
       if (!dragging) return;
-      setDelta(
-        Math.min(
-          Math.max(0, event.clientX - draggingStart),
-          trackWidth - thumbWidth,
-        ),
+
+      const nextDelta = Math.min(
+        Math.max(minDelta, event.clientX - draggingStart),
+        maxDelta,
       );
+      setDelta(nextDelta);
+
+      const percent = nextDelta / maxDelta;
+      const newValue = [...value];
+      newValue[thumbIndex] = Math.round(min + percent * (max - min));
+
+      onChange(newValue);
     }
+
     function handleUp() {
       setDragging(false);
     }
+
     if (dragging) {
       window.addEventListener('pointermove', handleMove);
       window.addEventListener('pointerup', handleUp);
     }
+
     return () => {
       window.removeEventListener('pointermove', handleMove);
       window.removeEventListener('pointerup', handleUp);
     };
-  }, [dragging, draggingStart, delta, trackWidth, thumbWidth]);
+  }, [
+    dragging,
+    draggingStart,
+    maxDelta,
+    minDelta,
+    thumbIndex,
+    min,
+    max,
+    onChange,
+    value,
+  ]);
 
-  // React.useEffect(() => {
-  //   if (!sliderRef.current || !thumbRef.current) return;
-  //
-  //   const handlePointerDown = (event: PointerEvent) => {
-  //     if (
-  //       event.currentTarget !== sliderRef.current ||
-  //       !sliderRef.current ||
-  //       !thumbRef.current
-  //     )
-  //       return;
-  //
-  //     const rect = sliderRef.current.getBoundingClientRect();
-  //     const clickX = event.clientX - rect.left;
-  //     const newDelta = Math.min(
-  //       Math.max(0, clickX - thumbRef.current.offsetWidth / 2),
-  //       trackWidth - thumbRef.current.offsetWidth,
-  //     );
-  //
-  //     setDelta(newDelta);
-  //     setDragging(true);
-  //     setDraggingStart(event.clientX - newDelta);
-  //   };
-  //
-  //   sliderRef.current.addEventListener('pointerdown', handlePointerDown);
-  //   return () => {
-  //     sliderRef.current?.removeEventListener('pointerdown', handlePointerDown);
-  //   };
-  // }, [sliderRef, thumbRef, trackWidth]);
+  React.useEffect(() => {
+    if (!sliderRef.current || !thumbRef.current) return;
+    const thumbs = sliderRef.current.querySelectorAll<HTMLElement>(
+      '[data-slider-thumb]',
+    );
+    const index = Array.from(thumbs).indexOf(thumbRef.current);
+    setThumbIndex(index);
+  }, []);
+
+  React.useEffect(() => {
+    if (value[thumbIndex] === undefined) return;
+    const percent =
+      (Math.max(min, Math.min(value[thumbIndex], max)) - min) / (max - min);
+    const newDelta = Math.round(percent * maxDelta);
+    setDelta(newDelta);
+  }, [value, thumbIndex, min, max, maxDelta]);
 
   React.useLayoutEffect(() => {
     if (!thumbRef.current) return;
@@ -161,9 +189,10 @@ function SliderThumb({
         setDraggingStart(event.clientX - delta);
         onPointerDown?.(event);
       }}
+      data-slider-thumb=""
       style={{
         ...style,
-        left: `${(delta / trackWidth) * 100}%`,
+        left: `${delta}px`,
       }}
     />
   );

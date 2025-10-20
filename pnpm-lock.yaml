@@ -279,6 +279,9 @@ importers:
       '@lucide-ui/context':
         specifier: workspace:*
         version: link:../context
+      '@lucide-ui/hooks':
+        specifier: workspace:*
+        version: link:../hooks
       '@lucide-ui/utils':
         specifier: workspace:*
         version: link:../utils

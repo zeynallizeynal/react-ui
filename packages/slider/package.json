@@ -34,7 +34,8 @@
   ],
   "dependencies": {
     "@lucide-ui/context": "workspace:*",
-    "@lucide-ui/utils": "workspace:*"
+    "@lucide-ui/utils": "workspace:*",
+    "@lucide-ui/hooks": "workspace:*"
   },
   "devDependencies": {
     "@lucide-ui/typescript-config": "workspace:*",
