@@ -150,9 +150,10 @@ function OTP({
           pattern={pattern}
           maxLength={slots.length}
           onFocus={() => {
-            const firstSlot = slots[value.length];
-            if (!firstSlot) return;
-            setActiveSlots([firstSlot]);
+            const focusableSlots = slots.filter(
+              (_, index) => index <= value.length,
+            );
+            setActiveSlots(focusableSlots);
           }}
           onBlur={() => {
             setActiveSlots([]);

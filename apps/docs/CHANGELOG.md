@@ -1,5 +1,12 @@
 # docs
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies
+  - @lucide-ui/otp@0.1.1
+
 ## 0.1.9
 
 ### Patch Changes
