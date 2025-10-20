@@ -1,22 +1,31 @@
 'use client';
 
+import { Progress } from '@/components/ui/progress';
+import { LuMinus, LuPlus } from 'react-icons/lu';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { OTP, OTPSlot } from '@/components/ui/otp';
 
 export default function Home() {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState<number>(0);
 
   return (
     <main className="flex relative items-center justify-center min-h-screen">
-      <div className="w-100 mx-auto">
-        <OTP value={value} onValueChange={setValue}>
-          <OTPSlot />
-          <OTPSlot />
-          <OTPSlot />
-          <OTPSlot />
-          <OTPSlot />
-          <OTPSlot />
-        </OTP>
+      <div className="w-100 mx-auto space-y-2">
+        <Progress value={value} />
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setValue((prevState) => prevState + 10)}
+            variant="outline"
+          >
+            <LuPlus /> 10
+          </Button>
+          <Button
+            onClick={() => setValue((prevState) => prevState - 10)}
+            variant="outline"
+          >
+            <LuMinus /> 10
+          </Button>
+        </div>
         {/*
         <Accordion type="single">
           <AccordionItem value="item-1">

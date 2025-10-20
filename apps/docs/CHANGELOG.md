@@ -1,5 +1,12 @@
 # docs
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies
+  - @lucide-ui/progress@0.1.0
+
 ## 0.1.10
 
 ### Patch Changes
