@@ -1,5 +1,12 @@
 # docs
 
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies
+  - @lucide-ui/slider@0.2.0
+
 ## 0.1.12
 
 ### Patch Changes
