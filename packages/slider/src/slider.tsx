@@ -164,6 +164,69 @@ function SliderThumb({
     setThumbIndex(index);
   }, []);
 
+  /**
+   * Drag the closest thumb on slider pointerdown
+   */
+  // React.useEffect(() => {
+  //   if (!sliderRef.current) return;
+  //
+  //   function handleLeftDown(event: PointerEvent) {
+  //     if (!sliderRef.current) return;
+  //
+  //     const target = event.target as HTMLElement;
+  //     if (target.closest('[data-slider-thumb]')) return;
+  //
+  //     const thumbs = sliderRef.current.querySelectorAll<HTMLElement>(
+  //       '[data-slider-thumb]:not([disabled])',
+  //     );
+  //     if (!thumbs.length) return;
+  //
+  //     const clickX = event.clientX;
+  //     let closestThumbIndex = -1;
+  //     let minDistance = Infinity;
+  //     let closestThumb: HTMLElement | null = null;
+  //
+  //     thumbs.forEach((thumb, index) => {
+  //       const rect = thumb.getBoundingClientRect();
+  //       const distance = Math.abs(rect.left + rect.width / 2 - clickX);
+  //       if (distance < minDistance) {
+  //         minDistance = distance;
+  //         closestThumb = thumb;
+  //         closestThumbIndex = index;
+  //       }
+  //     });
+  //
+  //     if (!closestThumb) return;
+  //     const trackRect = sliderRef.current.getBoundingClientRect();
+  //     const clickPosition = clickX - trackRect.left;
+  //     const percent = Math.max(0, Math.min(1, clickPosition / maxDelta));
+  //     const newValue = [...value];
+  //     newValue[closestThumbIndex] = Math.round(min + percent * (max - min));
+  //
+  //     console.log(clickPosition, maxDelta);
+  //
+  //     onChange(newValue);
+  //
+  //     (closestThumb as HTMLElement).focus();
+  //
+  //     const pointerDownEvent = new PointerEvent('pointerdown', {
+  //       bubbles: true,
+  //       cancelable: true,
+  //       clientX: event.clientX,
+  //       clientY: event.clientY,
+  //       pointerId: event.pointerId,
+  //       pointerType: event.pointerType,
+  //     });
+  //
+  //     (closestThumb as HTMLElement).dispatchEvent(pointerDownEvent);
+  //   }
+  //
+  //   sliderRef.current.addEventListener('pointerdown', handleLeftDown);
+  //   return () => {
+  //     sliderRef.current?.removeEventListener('pointerdown', handleLeftDown);
+  //   };
+  // }, [sliderRef, maxDelta, min, max, onChange, value]);
+
   React.useEffect(() => {
     if (value[thumbIndex] === undefined) return;
     const percent =

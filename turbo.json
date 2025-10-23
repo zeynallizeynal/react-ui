@@ -31,6 +31,11 @@
         "^clean"
       ]
     },
+    "release": {
+      "dependsOn": [
+        "^release"
+      ]
+    },
     "dev": {
       "cache": false,
       "persistent": true
